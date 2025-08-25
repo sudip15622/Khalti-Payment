@@ -202,11 +202,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-For support, email sudip@example.com or create an issue in this repository.
+For support, email sudip15622@example.com or create an issue in this repository.
 
 ## 🔗 Links
 
-- [Live Demo](https://your-deployment-url.vercel.app)
 - [Khalti Documentation](https://docs.khalti.com/)
 - [Next.js Documentation](https://nextjs.org/docs)
 
