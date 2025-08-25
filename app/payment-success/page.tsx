@@ -16,11 +16,21 @@ export default function PaymentSuccess() {
 
   useEffect(() => {
     // Clear the cart on successful payment only once
-    if (!hasCleared.current) {
+    if (!hasCleared.current && pidx) {
+      console.log('Payment successful, clearing cart...');
+      
+      // Clear the cart immediately
       clearCart();
       hasCleared.current = true;
+      
+      // Clear localStorage as well to ensure sync
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('cart', JSON.stringify([]));
+      }
+      
+      console.log('Cart cleared successfully');
     }
-  }, []); // Empty dependency array - only run once on mount
+  }, [clearCart, pidx]); // Include clearCart and pidx in dependencies
 
   const handleContinueShopping = () => {
     router.push('/');

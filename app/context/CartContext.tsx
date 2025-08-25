@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useReducer, ReactNode, useEffect } from 'react';
+import { createContext, useContext, useReducer, ReactNode, useEffect, useCallback } from 'react';
 import { Product } from '../products';
 
 export interface CartItem extends Product {
@@ -111,11 +111,13 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
       saveToLocalStorage(newState.items);
       break;
     case 'CLEAR_CART':
+      console.log('CLEAR_CART action received');
       newState = {
         ...state,
         items: []
       };
       saveToLocalStorage(newState.items);
+      console.log('Cart cleared and localStorage updated');
       break;
     case 'TOGGLE_CART':
       newState = {
@@ -148,33 +150,47 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   }, []);
 
-  const addToCart = (product: Product) => {
+  // Listen for localStorage changes (for cross-tab synchronization)
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'cart' && e.newValue !== null) {
+        const newItems = JSON.parse(e.newValue);
+        dispatch({ type: 'LOAD_FROM_STORAGE', payload: newItems });
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
+  const addToCart = useCallback((product: Product) => {
     dispatch({ type: 'ADD_TO_CART', payload: product });
-  };
+  }, []);
 
-  const removeFromCart = (productId: number) => {
+  const removeFromCart = useCallback((productId: number) => {
     dispatch({ type: 'REMOVE_FROM_CART', payload: productId });
-  };
+  }, []);
 
-  const updateQuantity = (productId: number, quantity: number) => {
+  const updateQuantity = useCallback((productId: number, quantity: number) => {
     dispatch({ type: 'UPDATE_QUANTITY', payload: { id: productId, quantity } });
-  };
+  }, []);
 
-  const clearCart = () => {
+  const clearCart = useCallback(() => {
+    console.log('clearCart function called');
     dispatch({ type: 'CLEAR_CART' });
-  };
+  }, []);
 
-  const toggleCart = () => {
+  const toggleCart = useCallback(() => {
     dispatch({ type: 'TOGGLE_CART' });
-  };
+  }, []);
 
-  const getTotalPrice = () => {
+  const getTotalPrice = useCallback(() => {
     return state.items.reduce((total, item) => total + item.price * item.quantity, 0);
-  };
+  }, [state.items]);
 
-  const getTotalItems = () => {
+  const getTotalItems = useCallback(() => {
     return state.items.reduce((total, item) => total + item.quantity, 0);
-  };
+  }, [state.items]);
 
   const value: CartContextType = {
     state,
